@@ -5,6 +5,8 @@ end
 defmodule Shout do
   alias Shout.Subscription
 
+  @compile_subscription_apps Application.compile_env(:shout, :apps, [])
+
   defmacro __using__(_env) do
 	  quote do
       Module.register_attribute(__MODULE__, :compile_time_subscriptions, accumulate: true, persist: true)
@@ -37,8 +39,8 @@ defmodule Shout do
   end
 
   def compile_time_subscriptions do
-    ebin = :code.lib_dir(:shout, :ebin)
-    mods = Protocol.extract_impls(CompileTimeSubscribers, [ebin])
+    ebin_dirs = Enum.map(@compile_subscription_apps, fn app -> :code.lib_dir(app, :ebin) end)
+    mods = Protocol.extract_impls(CompileTimeSubscribers, ebin_dirs)
 
     Enum.flat_map(mods, fn mod -> mod.compile_time_subscriptions() end)
   end
