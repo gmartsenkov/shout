@@ -16,7 +16,7 @@ defmodule Shout do
       end
 
       def compile_time_subscriptions() do
-        __MODULE__.__info__(:attributes)
+        __MODULE__.module_info(:attributes)
         |> Enum.map(fn {k,v} -> if k == :compile_time_subscriptions, do: v end)
         |> Enum.reject(&is_nil/1)
         |> List.flatten()
