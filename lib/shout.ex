@@ -2,6 +2,16 @@ defprotocol CompileTimeSubscribers do
   def compile_time_subscriptions(_)
 end
 
+defmodule Shout.Subs do
+  defmacro __before_compile__(_env) do
+    quote do
+      def compile_time_subscriptions() do
+        @compile_time_subscriptions
+      end
+    end
+  end
+end
+
 defmodule Shout do
   alias Shout.Subscription
 
@@ -9,19 +19,14 @@ defmodule Shout do
 
   defmacro __using__(_env) do
     quote do
-      Module.register_attribute(__MODULE__, :compile_time_subscriptions, accumulate: true, persist: true)
+      Module.register_attribute(__MODULE__, :compile_time_subscriptions, accumulate: true)
 
       import Shout
 
-      defimpl CompileTimeSubscribers  do
-        def compile_time_subscriptions(_any), do: nil
-      end
+      @before_compile Shout.Subs
 
-      def compile_time_subscriptions() do
-        __MODULE__.module_info(:attributes)
-        |> Enum.map(fn {k,v} -> if k == :compile_time_subscriptions, do: v end)
-        |> Enum.reject(&is_nil/1)
-        |> List.flatten()
+      defimpl CompileTimeSubscribers do
+        def compile_time_subscriptions(_any), do: nil
       end
     end
   end
@@ -33,9 +38,11 @@ defmodule Shout do
       to = Keyword.get(opts, :with)
 
       subscription = %Subscription{from: from, event: event, to: to}
+
       case __ENV__ do
         %{function: nil} ->
           Module.put_attribute(__MODULE__, :compile_time_subscriptions, subscription)
+
         _else ->
           Shout.Store.register_subscription(subscription)
       end
