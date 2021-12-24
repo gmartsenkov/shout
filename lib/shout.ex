@@ -8,7 +8,7 @@ defmodule Shout do
   @compile_subscription_apps Application.compile_env(:shout, :apps, [])
 
   defmacro __using__(_env) do
-	  quote do
+    quote do
       Module.register_attribute(__MODULE__, :compile_time_subscriptions, accumulate: true, persist: true)
 
       import Shout
@@ -26,9 +26,13 @@ defmodule Shout do
     end
   end
 
-  defmacro subscribe(from, event, to) do
-    quote do
-      subscription = %Subscription{from: unquote(from), event: unquote(event), to: unquote(to)}
+  defmacro subscribe(opts) do
+    quote bind_quoted: [opts: opts] do
+      from = Keyword.get(opts, :to)
+      event = Keyword.get(opts, :for)
+      to = Keyword.get(opts, :with)
+
+      subscription = %Subscription{from: from, event: event, to: to}
       case __ENV__ do
         %{function: nil} ->
           Module.put_attribute(__MODULE__, :compile_time_subscriptions, subscription)

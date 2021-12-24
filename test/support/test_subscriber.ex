@@ -1,6 +1,6 @@
 defmodule TestSubscriber do
   use Shout
 
-  subscribe(Module, :some_event, &String.split/2)
-  subscribe(Enum, :another_event, &String.split/1)
+  subscribe(to: Module, for: :some_event, with: &String.split/2)
+  subscribe(to: Enum, for: :another_event, with: &String.split/1)
 end

@@ -1,5 +1,5 @@
 defmodule AnotherSubscriber do
   use Shout
 
-  subscribe(List, :flatten, &Enum.sort/1)
+  subscribe(to: List, for: :flatten, with: &Enum.sort/1)
 end
