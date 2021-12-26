@@ -14,8 +14,11 @@ defmodule Shout.Router do
   end
 
   defmacro __using__(_env) do
-    quote do
+    router = __CALLER__.module
+
+    quote bind_quoted: [router: router] do
       defmodule Publisher do
+
         defmacro __using__(_env) do
           quote do
             import Publisher
@@ -23,16 +26,8 @@ defmodule Shout.Router do
         end
 
         defmacro broadcast(event, data) do
-          router =
-            __MODULE__
-            |> to_string
-            |> String.split(".")
-            |> List.pop_at(-1)
-            |> elem(1)
-            |> Module.safe_concat()
-
           caller = __CALLER__.module
-
+          router = unquote(router)
           quote bind_quoted: [router: router, caller: caller, data: data, event: event] do
             Shout.Store.subscriptions(caller, event, router)
             |> Shout.Runner.run(data)
