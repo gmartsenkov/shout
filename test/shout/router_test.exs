@@ -24,6 +24,6 @@ defmodule Shout.RouterTest do
       ]
     )
 
-    TestSubscriber.subscribe(to: List, for: :compact, with: &String.split/1)
+    TestSubscriber.subscribe(List, :compact, with: &String.split/1)
   end
 end

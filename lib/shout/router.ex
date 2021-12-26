@@ -1,7 +1,7 @@
 defmodule Shout.Router do
   alias Shout.Subscription
 
-  @dialyzer {:no_return, {:subscribe, 1}}
+  @dialyzer {:no_return, {:subscribe, 3}}
 
   defmodule CompileTimeSubs do
     defmacro __before_compile__(_env) do
@@ -21,7 +21,7 @@ defmodule Shout.Router do
 
       import Shout.Router
 
-      defdelegate subscribe(opts), to: Shout.Router
+      defdelegate subscribe(from, event, opts), to: Shout.Router
 
       def start_link(opts) do
         Shout.Store.start_link(
@@ -46,10 +46,8 @@ defmodule Shout.Router do
     end
   end
 
-  defmacro subscribe(opts) do
-    quote bind_quoted: [opts: opts] do
-      from = Keyword.get(opts, :to)
-      event = Keyword.get(opts, :for)
+  defmacro subscribe(from, event, opts) do
+    quote bind_quoted: [opts: opts, from: from, event: event] do
       to = Keyword.get(opts, :with)
 
       subscription = %Subscription{from: from, event: event, to: to}
