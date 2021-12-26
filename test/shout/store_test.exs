@@ -5,16 +5,10 @@ defmodule Shout.StoreTest do
 
   alias Shout.Store
 
-  def random_table_name do
-    for _ <- 1..10, into: "", do: <<Enum.random('0123456789abcdef')>>
-  end
-
   setup do
-    table_name = String.to_atom(random_table_name())
-    {:ok, pid} = Store.start_link(name: nil, table: table_name)
+    {:ok, pid} = Store.start_link([])
 
     [
-      table: table_name,
       store: pid,
       subscription: %Shout.Subscription{from: Module, event: :some_event, to: &String.split/1},
       another_subscription: %Shout.Subscription{
@@ -26,45 +20,48 @@ defmodule Shout.StoreTest do
   end
 
   describe "init" do
-    test "it creates the correct ets table and returns the correct tuple" do
-      assert :ets.whereis(:init_test) == :undefined
-      assert Store.init(table: :init_test) == {:ok, :init_test}
-      refute :ets.whereis(:init_test) == :undefined
+    test "returns the default state" do
+      assert Store.init([]) == {:ok, %{subscriptions: []}}
+    end
+
+    test "with compile time subscriptions", context do
+      subs = [context.subscription]
+
+      assert Store.init(compile_time_subscriptions: subs) ==
+               {:ok, %{subscriptions: [context.subscription]}}
     end
   end
 
   describe "register_subscription" do
-    test "calls the correct genserver message", context do
-      assert :ets.tab2list(context.table) == []
-
+    test "adds the subscription to the genserver state", context do
+      assert Store.subscriptions(context.store) == []
       :ok = Store.register_subscription(context.subscription, context.store)
 
       assert_lists_equal(
-        :ets.tab2list(context.table),
-        [
-          {{Module, :some_event}, &String.split/1}
-        ]
+        Store.subscriptions(context.store),
+        [context.subscription]
       )
 
       :ok = Store.register_subscription(context.another_subscription, context.store)
 
       assert_lists_equal(
-        :ets.tab2list(context.table),
-        [
-          {{Module, :some_event}, &String.split/1},
-          {{Module, :some_event}, &String.split/2}
-        ]
+        Store.subscriptions(context.store),
+        [context.subscription, context.another_subscription]
       )
 
-      :ok = Store.register_subscription(context.subscription, context.store)
+      Store.register_subscription(context.subscription, context.store)
 
       assert_lists_equal(
-        :ets.tab2list(context.table),
-        [
-          {{Module, :some_event}, &String.split/1},
-          {{Module, :some_event}, &String.split/2}
-        ]
+        Store.subscriptions(context.store),
+        [context.subscription, context.another_subscription]
       )
+    end
+
+    test "doesn't create a duplicate", context do
+      :ok = Store.register_subscription(context.subscription, context.store)
+      assert_lists_equal(Store.subscriptions(context.store), [context.subscription])
+      :exists = Store.register_subscription(context.subscription, context.store)
+      assert_lists_equal(Store.subscriptions(context.store), [context.subscription])
     end
   end
 
@@ -74,24 +71,19 @@ defmodule Shout.StoreTest do
       :ok = Store.register_subscription(context.another_subscription, context.store)
 
       assert_lists_equal(
-        :ets.tab2list(context.table),
-        [
-          {{Module, :some_event}, &String.split/1},
-          {{Module, :some_event}, &String.split/2}
-        ]
+        Store.subscriptions(context.store),
+        [context.subscription, context.another_subscription]
       )
 
       assert Store.unregister_subscription(context.subscription, context.store)
 
       assert_lists_equal(
-        :ets.tab2list(context.table),
-        [
-          {{Module, :some_event}, &String.split/2}
-        ]
+        Store.subscriptions(context.store),
+        [context.another_subscription]
       )
 
       assert Store.unregister_subscription(context.another_subscription, context.store)
-      assert :ets.tab2list(context.table) == []
+      assert_lists_equal(Store.subscriptions(context.store), [])
     end
   end
 
@@ -103,20 +95,20 @@ defmodule Shout.StoreTest do
       :ok = Store.register_subscription(%{context.subscription | from: List}, context.store)
 
       assert_lists_equal(
-        :ets.tab2list(context.table),
+        Store.subscriptions(context.store),
         [
-          {{List, :some_event}, &String.split/1},
-          {{Module, :some_event}, &String.split/1},
-          {{Module, :some_event}, &String.split/2},
-          {{Module, :another}, &String.split/1}
+          %Shout.Subscription{event: :some_event, from: Module, to: &String.split/1},
+          %Shout.Subscription{event: :some_event, from: Module, to: &String.split/2},
+          %Shout.Subscription{event: :another, from: Module, to: &String.split/1},
+          %Shout.Subscription{event: :some_event, from: List, to: &String.split/1}
         ]
       )
 
       assert_lists_equal(
         Store.subscriptions(Module, :some_event, context.store),
         [
-          {{Module, :some_event}, &String.split/1},
-          {{Module, :some_event}, &String.split/2}
+          %Shout.Subscription{event: :some_event, from: Module, to: &String.split/1},
+          %Shout.Subscription{event: :some_event, from: Module, to: &String.split/2}
         ]
       )
     end
