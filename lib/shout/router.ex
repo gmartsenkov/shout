@@ -15,8 +15,34 @@ defmodule Shout.Router do
 
   defmacro __using__(_env) do
     quote do
-      Module.register_attribute(__MODULE__, :compile_time_subscriptions, accumulate: true)
+      defmodule Publisher do
+        defmacro __using__(_env) do
+          quote do
+            import Publisher
+          end
+        end
 
+        defmacro broadcast(event, data) do
+          router =
+            __MODULE__
+            |> to_string
+            |> String.split(".")
+            |> List.pop_at(-1)
+            |> elem(1)
+            |> Module.safe_concat()
+
+          caller = __CALLER__.module
+
+          quote bind_quoted: [router: router, caller: caller, data: data, event: event] do
+            Shout.Store.subscriptions(caller, event, router)
+            |> Shout.Runner.run(data)
+
+            data
+          end
+        end
+      end
+
+      Module.register_attribute(__MODULE__, :compile_time_subscriptions, accumulate: true)
       @before_compile CompileTimeSubs
 
       import Shout.Router
