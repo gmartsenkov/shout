@@ -1,6 +1,8 @@
 defmodule Shout.Router do
   alias Shout.Subscription
 
+  @dialyzer {:no_return, {:subscribe, 1}}
+
   defmodule CompileTimeSubs do
     defmacro __before_compile__(_env) do
       quote do
