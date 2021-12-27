@@ -5,7 +5,7 @@
 
   # Usage
 
-  Create your router, usually one per app but can be many. You'll define all the subscriptions in there. It's simply a GenServer that will keep track of subscriptions and allow you to add or remove more. (Don't forget to add it to your supervision tree)
+  Create your router, usually one per app but can be many. You'll define all the subscriptions in there. It's simply a GenServer that will keep track of subscriptions and allow you to add or remove subscriptions. **(Don't forget to add it to your supervision tree)**
 
   ### Router
   ```elixir
