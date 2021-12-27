@@ -7,7 +7,7 @@ defmodule Shout.Subscription do
   @type t :: %__MODULE__{
           from: Module.t(),
           event: String.t(),
-          to: Function.t(),
+          to: function(),
           async: boolean()
         }
 end
