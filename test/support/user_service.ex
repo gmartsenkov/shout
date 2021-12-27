@@ -1,4 +1,5 @@
 defmodule UserService do
+  @moduledoc false
   import TestSubscriber.Publisher
 
   def create_user do

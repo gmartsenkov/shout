@@ -1,4 +1,5 @@
 defmodule TestSubscriber do
+  @moduledoc false
   use Shout.Router
 
   subscribe(UserService, :user_created, with: &EmailService.notify_user/1)

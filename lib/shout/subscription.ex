@@ -1,4 +1,7 @@
 defmodule Shout.Subscription do
+  @moduledoc """
+  A struct to represent a subscription.
+  """
   defstruct [:from, :event, :to, async: false]
 
   @type t :: %__MODULE__{

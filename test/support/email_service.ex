@@ -1,4 +1,5 @@
 defmodule EmailService do
+  @moduledoc false
   use TestSubscriber.Publisher
 
   def notify_user(_user) do

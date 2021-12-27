@@ -1,4 +1,7 @@
 defmodule Shout.Runner do
+  @moduledoc """
+  Contains the logic on how subscriptions are executed
+  """
   alias Shout.Subscription
 
   @spec run(list(Subscription.t()), any()) :: :ok

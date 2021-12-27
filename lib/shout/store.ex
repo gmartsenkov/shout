@@ -1,4 +1,14 @@
 defmodule Shout.Store do
+  @moduledoc """
+  GenServer to persist the subscriptions.
+  They are stored as an array
+  ```elixir
+  [
+    %Shout.Subscription{from: MyService, event: :created, to: &Email.notify/1},
+    ...
+  ]
+  ```
+  """
   use GenServer
 
   alias Shout.Subscription
@@ -42,12 +52,12 @@ defmodule Shout.Store do
         _from,
         %{subscriptions: subs} = state
       ) do
-    unless Enum.any?(subs, &(&1 == subscription)) do
+    if Enum.any?(subs, &(&1 == subscription)) do
+      {:reply, :exists, state}
+    else
       updated_subs = subs ++ [subscription]
 
       {:reply, :ok, put_in(state.subscriptions, updated_subs)}
-    else
-      {:reply, :exists, state}
     end
   end
 

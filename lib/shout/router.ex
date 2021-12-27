@@ -1,12 +1,38 @@
 defmodule Shout.Router do
+  @moduledoc """
+  Use this module to setup your subscription module.
+  Add it to your supervision tree, it'll start a simple GenServer and store the subscriptions.
+  ```elixir
+  defmodule MyApp.Events do
+    use Shout.Router
+
+    subscribe(MyApp.Users.Create, :user_created, to: &MyApp.Emails.welcome_email/1)
+  end
+
+  defmodule MyApp.Service.User do
+    use MyApp.Events.Publisher
+
+    def create(...) do
+      broadcast(:user_created, %{email: "jon@snow.com"})
+    end
+  end
+
+  defmodule MyApp.Emails do
+    def welcome_email(%{email: email}) do
+      SendEmail.to(email)
+    end
+  end
+  ```
+  """
   alias Shout.Subscription
 
   @dialyzer {:no_return, {:subscribe, 3}}
 
   defmodule CompileTimeSubs do
+    @moduledoc false
     defmacro __before_compile__(_env) do
       quote do
-        def compile_time_subscriptions() do
+        def compile_time_subscriptions do
           @compile_time_subscriptions
         end
       end

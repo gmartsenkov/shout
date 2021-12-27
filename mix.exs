@@ -8,7 +8,14 @@ defmodule Shout.MixProject do
       elixir: "~> 1.13",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      aliases: aliases(),
+      deps: deps(),
+      name: "Shout",
+      source_url: "https://github.com/gmartsenkov/shout",
+      docs: [
+        main: "Shout", # The main page in the docs
+        extras: ["README.md"]
+      ]
     ]
   end
 
@@ -25,7 +32,15 @@ defmodule Shout.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:assertions, "~> 0.19.0", only: :test}
+      {:assertions, "~> 0.19.0", only: :test},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.24", only: :dev, runtime: false},
+    ]
+  end
+
+  defp aliases do
+    [
+      test: ["test", "credo --strict"],
     ]
   end
 end
