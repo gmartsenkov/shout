@@ -97,7 +97,11 @@ defmodule Shout.StoreTest do
 
       assert_lists_equal(Store.subscriptions(context.store), [context.subscription])
 
-      assert Store.unregister_subscription(context.yet_another_subscription, context.store) == :missing
+      assert Store.unregister_subscription(
+               context.yet_another_subscription,
+               context.store
+             ) ==
+               :missing
 
       assert_lists_equal(Store.subscriptions(context.store), [context.subscription])
     end

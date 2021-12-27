@@ -40,7 +40,7 @@ defmodule Shout.RouterTest do
       TestSubscriber.subscriptions(),
       [
         %Subscription{event: :email_sent, from: EmailService, to: &EmailService.check_email/1},
-        %Subscription{event: :user_created, from: UserService, to: &EmailService.notify_user/1},
+        %Subscription{event: :user_created, from: UserService, to: &EmailService.notify_user/1}
       ]
     )
 
