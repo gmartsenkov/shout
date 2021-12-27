@@ -16,7 +16,7 @@
     subscribe(MyApp.Users.Create, :user_created, to: &MyApp.Emails.welcome_email/1)
 
     # Runs it asynchronously (uses Kernel.spawn/1)
-    subscribe(MyApp.Users.Updated, :user_updated, to: &MyApp.Service.custom_task/1, asnyc: true)
+    subscribe(MyApp.Users.Updated, :user_updated, to: &MyApp.Service.custom_task/1, async: true)
   end
   ```
   A subscription can be added at runtime too:
