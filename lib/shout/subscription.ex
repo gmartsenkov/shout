@@ -4,8 +4,8 @@ defmodule Shout.Subscription do
   """
   defstruct [:from, :event, :to, async: false]
 
-  @type t :: %__MODULE__{
-          from: Module.t(),
+  @type t :: %Shout.Subscription{
+          from: module(),
           event: String.t(),
           to: function(),
           async: boolean()

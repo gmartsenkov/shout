@@ -19,7 +19,8 @@ defmodule Shout.MixProject do
       docs: [
         main: "Shout", # The main page in the docs
         extras: ["README.md"]
-      ]
+      ],
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -39,6 +40,7 @@ defmodule Shout.MixProject do
       {:assertions, "~> 0.19.0", only: :test},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.14", only: [:test]},
     ]
   end
 
