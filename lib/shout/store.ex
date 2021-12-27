@@ -69,7 +69,7 @@ defmodule Shout.Store do
       ) do
     case match_subscriptions(subs, subscription.from, subscription.event) do
       [] ->
-        {:reply, :ok, state}
+        {:reply, :missing, state}
 
       found ->
         updated_subs = subs -- found
