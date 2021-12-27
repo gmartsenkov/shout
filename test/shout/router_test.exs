@@ -43,5 +43,12 @@ defmodule Shout.RouterTest do
         %Subscription{event: :user_created, from: UserService, to: &EmailService.notify_user/1},
       ]
     )
+
+    user = UserService.create_user()
+    assert user == %{name: "Jon Snow"}
+
+    assert_received {:event, :user_created}
+    assert_received {:event, :notify_user}
+    assert_received {:event, :check_email}
   end
 end
