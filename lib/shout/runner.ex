@@ -7,6 +7,10 @@ defmodule Shout.Runner do
   end
 
   @spec execute(Subscription.t(), any) :: :ok
+  defp execute(%Subscription{to: fun, async: true}, data) do
+    spawn(fn -> fun.(data) end)
+  end
+
   defp execute(%Subscription{to: fun}, data) when is_function(fun) do
     fun.(data)
   end

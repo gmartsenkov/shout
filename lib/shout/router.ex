@@ -71,8 +71,9 @@ defmodule Shout.Router do
   defmacro subscribe(from, event, opts) do
     quote bind_quoted: [opts: opts, from: from, event: event] do
       to = Keyword.get(opts, :with)
+      async = Keyword.get(opts, :async, false)
 
-      subscription = %Subscription{from: from, event: event, to: to}
+      subscription = %Subscription{from: from, event: event, to: to, async: async}
 
       case __ENV__ do
         %{function: nil} ->
