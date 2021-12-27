@@ -15,6 +15,11 @@ defmodule Shout.StoreTest do
         from: Module,
         event: :some_event,
         to: &String.split/2
+      },
+      yet_another_subscription: %Shout.Subscription{
+        from: Module,
+        event: :another_event,
+        to: &String.split/1
       }
     ]
   end
@@ -69,20 +74,21 @@ defmodule Shout.StoreTest do
     test "calls the correct genserver message", context do
       :ok = Store.register_subscription(context.subscription, context.store)
       :ok = Store.register_subscription(context.another_subscription, context.store)
+      :ok = Store.register_subscription(context.yet_another_subscription, context.store)
 
       assert_lists_equal(
         Store.subscriptions(context.store),
-        [context.subscription, context.another_subscription]
+        [context.subscription, context.another_subscription, context.yet_another_subscription]
       )
 
       assert Store.unregister_subscription(context.subscription, context.store)
 
       assert_lists_equal(
         Store.subscriptions(context.store),
-        [context.another_subscription]
+        [context.yet_another_subscription]
       )
 
-      assert Store.unregister_subscription(context.another_subscription, context.store)
+      assert Store.unregister_subscription(context.yet_another_subscription, context.store)
       assert_lists_equal(Store.subscriptions(context.store), [])
     end
   end

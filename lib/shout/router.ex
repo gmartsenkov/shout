@@ -18,7 +18,6 @@ defmodule Shout.Router do
 
     quote bind_quoted: [router: router] do
       defmodule Publisher do
-
         defmacro __using__(_env) do
           quote do
             import Publisher
@@ -28,6 +27,7 @@ defmodule Shout.Router do
         defmacro broadcast(event, data) do
           caller = __CALLER__.module
           router = unquote(router)
+
           quote bind_quoted: [router: router, caller: caller, data: data, event: event] do
             Shout.Store.subscriptions(caller, event, router)
             |> Shout.Runner.run(data)
@@ -43,6 +43,7 @@ defmodule Shout.Router do
       import Shout.Router
 
       defdelegate subscribe(from, event, opts), to: Shout.Router
+      defdelegate unsubscribe(from, event), to: Shout.Router
 
       def start_link(opts) do
         Shout.Store.start_link(
@@ -80,6 +81,15 @@ defmodule Shout.Router do
         _else ->
           Shout.Store.register_subscription(subscription, __MODULE__)
       end
+    end
+  end
+
+  defmacro unsubscribe(from, event) do
+    quote bind_quoted: [from: from, event: event] do
+      Shout.Store.unregister_subscription(
+        %Subscription{from: from, event: event},
+        __MODULE__
+      )
     end
   end
 end

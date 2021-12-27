@@ -3,11 +3,11 @@ defmodule Shout.Runner do
 
   @spec run(list(Subscription.t()), any()) :: :ok
   def run(subscriptions, data) do
-    Enum.each(subscriptions, &(execute(&1, data)))
+    Enum.each(subscriptions, &execute(&1, data))
   end
 
   @spec execute(Subscription.t(), any) :: :ok
   defp execute(%Subscription{to: fun}, data) when is_function(fun) do
     fun.(data)
-   end
+  end
 end

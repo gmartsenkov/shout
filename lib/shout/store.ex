@@ -57,11 +57,13 @@ defmodule Shout.Store do
         _from,
         %{subscriptions: subs} = state
       ) do
-    if Enum.any?(subs, &(&1 == subscription)) do
-      updated_subs = List.delete(subs, subscription)
-      {:reply, :ok, put_in(state.subscriptions, updated_subs)}
-    else
-      {:reply, :ok, state}
+    case match_subscriptions(subs, subscription.from, subscription.event) do
+      [] ->
+        {:reply, :ok, state}
+
+      found ->
+        updated_subs = subs -- found
+        {:reply, :ok, put_in(state.subscriptions, updated_subs)}
     end
   end
 
@@ -72,11 +74,14 @@ defmodule Shout.Store do
 
   @impl true
   def handle_call({:subscriptions, module, event}, _from, state) do
-    found =
-      Enum.filter(state.subscriptions, fn sub ->
-        sub.from == module && sub.event == event
-      end)
+    found = match_subscriptions(state.subscriptions, module, event)
 
     {:reply, found, state}
+  end
+
+  defp match_subscriptions(subs, from, event) do
+    Enum.filter(subs, fn sub ->
+      sub.from == from && sub.event == event
+    end)
   end
 end
