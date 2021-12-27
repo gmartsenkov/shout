@@ -1,6 +1,8 @@
 defmodule Shout.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/gmartsenkov/shout"
+
   def project do
     [
       app: :shout,
@@ -11,7 +13,9 @@ defmodule Shout.MixProject do
       aliases: aliases(),
       deps: deps(),
       name: "Shout",
-      source_url: "https://github.com/gmartsenkov/shout",
+      package: package(),
+      description: "A small library that provides Elixir modules with subscribe/publish functionality.",
+      source_url: @source_url,
       docs: [
         main: "Shout", # The main page in the docs
         extras: ["README.md"]
@@ -35,6 +39,14 @@ defmodule Shout.MixProject do
       {:assertions, "~> 0.19.0", only: :test},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
+    ]
+  end
+
+  defp package do
+    [
+      maintainers: ["Georgi Martsenkov"],
+      licenses: ["Apache-2.0"],
+      links: %{"GitHub" => @source_url}
     ]
   end
 
